@@ -27,11 +27,14 @@ class SyncService {
       // Xây dựng chuỗi văn bản báo cáo giống với bill in
       StringBuffer sb = StringBuffer();
       final printTitle = shift.printTitle.trim().isNotEmpty ? shift.printTitle : shift.name;
+      final timeStr = DateTime.fromMillisecondsSinceEpoch(shift.timestamp).toString().split('.')[0];
       
-      sb.writeln('📦 BÁO CÁO KIỂM KHO');
-      sb.writeln('🔖 Ca: $printTitle');
-      sb.writeln('🕒 Thời gian: ${DateTime.fromMillisecondsSinceEpoch(shift.timestamp).toString().split('.')[0]}');
-      sb.writeln('-----------------------------------');
+      sb.writeln('<b>Tên ca   :</b> $printTitle');
+      sb.writeln('<b>Thời gian:</b> $timeStr');
+      sb.writeln('<pre>');
+      sb.writeln('-------------------------------------');
+      sb.writeln(' TÊN MÓN       | T.LƯỢNG | QUY ĐỔI ');
+      sb.writeln('-------------------------------------');
 
       for (var item in items) {
         final itemLogs = entries.where((e) => e.itemId == item.id).toList();
@@ -76,13 +79,17 @@ class SyncService {
           resultStr = '${wholePortions}P';
         }
 
-        sb.writeln('▪️ ${item.name}');
-        sb.writeln('   Tổng lượng: $qtyStr');
-        sb.writeln('   Quy đổi: $resultStr');
+        String safeName = item.name;
+        if (safeName.length > 14) safeName = safeName.substring(0, 14);
+        
+        String col1 = safeName.padRight(14);
+        String col2 = qtyStr.padRight(8);
+        String col3 = resultStr;
+        
+        sb.writeln(' $col1| $col2| $col3');
       }
 
-      sb.writeln('-----------------------------------');
-      sb.writeln('✅ Đã đồng bộ thành công!');
+      sb.writeln('-------------------------------------</pre>');
 
       // Send to Telegram
       final url = Uri.parse('https://api.telegram.org/bot$botToken/sendMessage');
@@ -91,6 +98,7 @@ class SyncService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'chat_id': chatId,
+          'parse_mode': 'HTML',
           'text': sb.toString(),
         }),
       );
