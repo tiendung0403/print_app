@@ -3,12 +3,12 @@ import 'dart:convert';
 import '../models/shift_record.dart';
 import '../models/item.dart';
 import '../models/entry_log.dart';
-import '../database/database_helper.dart';
+import '../../../core/database/database_helper.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SyncService {
-  static const String botToken = '8959150505:AAHARrbpE86c9m4-Wc5f9IceloQ7A6mGyE8';
-  // Chat ID đã được xác thực
-  static String chatId = '7619074675'; 
+  static String get botToken => dotenv.env['TELEGRAM_BOT_TOKEN'] ?? '';
+  static String chatId = dotenv.env['TELEGRAM_CHAT_ID'] ?? ''; 
 
   static Future<bool> syncShiftToTelegram(ShiftRecord shift) async {
     if (chatId.isEmpty) {

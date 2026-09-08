@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:intl/intl.dart';
-import '../../models/shift_record.dart';
-import '../../database/database_helper.dart';
-import '../../services/storage_service.dart';
+import '../models/shift_record.dart';
+import '../../../core/database/database_helper.dart';
+import '../../../core/storage/storage_service.dart';
 import 'inventory_screen.dart';
 
 class ShiftListScreen extends StatefulWidget {

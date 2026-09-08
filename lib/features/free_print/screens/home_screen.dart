@@ -4,10 +4,11 @@ import 'dart:typed_data';
 import 'package:screenshot/screenshot.dart';
 import 'package:image/image.dart' as img;
 import 'package:toastification/toastification.dart';
-import '../services/storage_service.dart';
-import '../services/printer_service.dart';
-import '../utils/vn_utils.dart';
-import 'settings_screen.dart';
+import '../../../core/storage/storage_service.dart';
+import '../../../core/printing/printer_service.dart';
+import '../../../core/printing/paper_size.dart';
+import '../../../core/utils/vn_utils.dart';
+import '../../settings/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final StorageService storageService;
@@ -44,7 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final double printWidth = paperSize == '80' ? 576 : 384;
+      final pSize = parsePaperSize(paperSize);
+      final double printWidth = getPrintWidth(pSize).toDouble();
       
       Widget receiptWidget = Directionality(
         textDirection: TextDirection.ltr,
@@ -155,8 +157,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPreviewTab() {
     final paperSizeStr = widget.storageService.paperSize;
-    final is80mm = paperSizeStr == '80';
-    final maxWidth = is80mm ? 48 : 32;
+    final pSize = parsePaperSize(paperSizeStr);
+    final maxWidth = getPaperCharactersWidth(pSize);
+    final is80mm = pSize == PaperSize.mm80;
     
     // Format text
     final previewText = _formatPreviewText(_contentController.text, maxWidth);

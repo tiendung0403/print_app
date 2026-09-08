@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'dart:convert';
-import '../../models/item.dart';
-import '../../models/shift_record.dart';
-import '../../models/entry_log.dart';
-import '../../database/database_helper.dart';
+import '../models/item.dart';
+import '../models/shift_record.dart';
+import '../models/entry_log.dart';
+import '../../../core/database/database_helper.dart';
 import 'shift_summary_screen.dart';
-import '../../services/storage_service.dart';
-import '../../services/sync_service.dart';
+import '../../../core/storage/storage_service.dart';
+import '../services/sync_service.dart';
 import 'package:toastification/toastification.dart';
 
 class InventoryScreen extends StatefulWidget {

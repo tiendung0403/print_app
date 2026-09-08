@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:toastification/toastification.dart';
-import 'services/storage_service.dart';
-import 'screens/main_navigation_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'core/storage/storage_service.dart';
+import 'features/navigation/screens/main_navigation_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   final storageService = await StorageService.init();
   
   runApp(MyApp(storageService: storageService));

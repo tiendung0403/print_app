@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:my_prinf_app/screens/home_screen.dart';
-import 'package:my_prinf_app/screens/inventory/shift_list_screen.dart';
-import 'package:my_prinf_app/screens/settings_screen.dart';
-import '../services/storage_service.dart';
+import '../../free_print/screens/home_screen.dart';
+import '../../inventory/screens/shift_list_screen.dart';
+import '../../settings/screens/settings_screen.dart';
+import '../../../core/storage/storage_service.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final StorageService storageService;

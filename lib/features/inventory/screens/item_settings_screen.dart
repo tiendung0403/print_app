@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:toastification/toastification.dart';
-import '../../models/item.dart';
-import '../../database/database_helper.dart';
+import '../models/item.dart';
+import '../../../core/database/database_helper.dart';
 
 class ItemSettingsScreen extends StatefulWidget {
   const ItemSettingsScreen({Key? key}) : super(key: key);

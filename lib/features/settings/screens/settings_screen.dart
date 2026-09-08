@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:toastification/toastification.dart';
-import '../services/storage_service.dart';
-import '../services/network_scanner_service.dart';
-import 'inventory/item_settings_screen.dart' as my_prinf_app_items;
+import '../../../core/storage/storage_service.dart';
+import '../../../core/printing/network_scanner_service.dart';
+import '../../inventory/screens/item_settings_screen.dart' as my_prinf_app_items;
 
 class SettingsScreen extends StatefulWidget {
   final StorageService storageService;

@@ -1,8 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/item.dart';
-import '../models/shift_record.dart';
-import '../models/entry_log.dart';
+import '../../features/inventory/models/item.dart';
+import '../../features/inventory/models/shift_record.dart';
+import '../../features/inventory/models/entry_log.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();

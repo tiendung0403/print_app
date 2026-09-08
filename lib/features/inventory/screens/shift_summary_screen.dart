@@ -4,11 +4,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:screenshot/screenshot.dart';
 import 'package:image/image.dart' as img;
-import '../../models/shift_record.dart';
-import '../../database/database_helper.dart';
-import '../../services/storage_service.dart';
-import '../../services/printer_service.dart';
-import '../../utils/vn_utils.dart';
+import '../models/shift_record.dart';
+import '../../../core/database/database_helper.dart';
+import '../../../core/storage/storage_service.dart';
+import '../../../core/printing/printer_service.dart';
+import '../../../core/printing/paper_size.dart';
+import '../../../core/utils/vn_utils.dart';
 import 'package:toastification/toastification.dart';
 
 class ShiftSummaryScreen extends StatefulWidget {
@@ -190,7 +191,8 @@ class _ShiftSummaryScreenState extends State<ShiftSummaryScreen> {
     setState(() => _isPrinting = true);
     
     try {
-      final double printWidth = paperSize == '80' ? 576 : 384;
+      final pSize = parsePaperSize(paperSize);
+      final double printWidth = getPrintWidth(pSize).toDouble();
       
       Widget receiptWidget = Directionality(
         textDirection: TextDirection.ltr,
