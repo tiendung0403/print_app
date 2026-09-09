@@ -1,8 +1,15 @@
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 class NetworkScannerService {
   final NetworkInfo _networkInfo = NetworkInfo();
+
+  /// Xin quyền vị trí (bắt buộc trên Android 10+ để đọc WiFi IP)
+  Future<bool> requestLocationPermission() async {
+    final status = await Permission.locationWhenInUse.request();
+    return status.isGranted;
+  }
 
   /// Quét mạng nội bộ theo từng batch nhỏ để tránh nghẽn mạng.
   /// [onProgress] callback trả về (scanned, total) để cập nhật UI tiến trình.
@@ -12,11 +19,23 @@ class NetworkScannerService {
     int timeoutMs = 800,
     void Function(int scanned, int total)? onProgress,
   }) async {
+    // Kiểm tra & xin quyền vị trí nếu cần
+    final hasPermission = await requestLocationPermission();
+    if (!hasPermission) {
+      throw Exception(
+        'Cần quyền truy cập Vị trí để dò tìm máy in qua WiFi.\n'
+        'Vui lòng cấp quyền trong Cài đặt điện thoại.',
+      );
+    }
+
     final List<String> activeIps = [];
     final String? wifiIP = await _networkInfo.getWifiIP();
 
     if (wifiIP == null) {
-      return activeIps;
+      throw Exception(
+        'Không lấy được địa chỉ IP WiFi.\n'
+        'Hãy đảm bảo điện thoại đang kết nối WiFi cùng mạng với máy in.',
+      );
     }
 
     final String subnet = wifiIP.substring(0, wifiIP.lastIndexOf('.'));
