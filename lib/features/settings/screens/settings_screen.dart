@@ -64,6 +64,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _scanTotal = 254;
     });
 
+    _showSnackBar('🔍 Đang quét mạng, vui lòng chờ...');
+
     try {
       final activePrinters = await _scannerService.scanForPrinters(
         onProgress: (scanned, total) {
@@ -82,11 +84,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       });
 
       if (activePrinters.isEmpty) {
-        _showSnackBar('Không tìm thấy máy in nào trong mạng (Port 9100).', isError: true);
+        _showSnackBar(
+          'Không tìm thấy máy in nào.\nKiểm tra máy in có bật và cùng mạng WiFi không.',
+          isError: true,
+        );
       } else if (activePrinters.length == 1) {
         _ipController.text = activePrinters.first;
-        _showSnackBar('Đã tìm thấy máy in tại ${activePrinters.first}');
+        _showSnackBar('✅ Đã tìm thấy máy in tại ${activePrinters.first}');
       } else {
+        _showSnackBar('✅ Tìm thấy ${activePrinters.length} thiết bị, chọn máy in bên dưới.');
         _showPrinterSelectionDialog(activePrinters);
       }
     } catch (e) {
@@ -95,7 +101,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _isScanning = false;
         _scanProgress = 0;
       });
-      _showSnackBar('Lỗi khi quét mạng: $e', isError: true);
+
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      _showSnackBar(msg, isError: true);
     }
   }
 
