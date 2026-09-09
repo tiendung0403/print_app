@@ -5,12 +5,14 @@ import 'package:toastification/toastification.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/printing/network_scanner_service.dart';
 import '../../../core/printing/printer_service.dart';
-import '../../inventory/screens/item_settings_screen.dart' as my_prinf_app_items;
+import '../../inventory/screens/item_settings_screen.dart'
+    as my_prinf_app_items;
 
 class SettingsScreen extends StatefulWidget {
   final StorageService storageService;
 
-  const SettingsScreen({Key? key, required this.storageService}) : super(key: key);
+  const SettingsScreen({Key? key, required this.storageService})
+    : super(key: key);
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -92,9 +94,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       } else if (printers.length == 1) {
         _ipController.text = printers.first;
-        _showSnackBar('✅ Đã tìm thấy máy in tại ${printers.first}');
+        _showSnackBar('Đã tìm thấy máy in tại ${printers.first}');
       } else {
-        _showSnackBar('✅ Tìm thấy ${printers.length} máy in, chọn bên dưới.');
+        _showSnackBar('Tìm thấy ${printers.length} máy in, chọn bên dưới.');
         _showPrinterSelectionDialog(printers);
       }
     } catch (e) {
@@ -130,22 +132,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Navigator.pop(context);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 8,
+                    ),
                     decoration: const BoxDecoration(
-                      border: Border(bottom: BorderSide(color: Color(0xFFF4F4F5))),
+                      border: Border(
+                        bottom: BorderSide(color: Color(0xFFF4F4F5)),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.printer, size: 20, color: Color(0xFF16A34A)),
+                        const Icon(
+                          LucideIcons.printer,
+                          size: 20,
+                          color: Color(0xFF16A34A),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(printers[index], style: const TextStyle(fontWeight: FontWeight.w600)),
+                              Text(
+                                printers[index],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               const Text(
                                 '🖨️ Máy in (Port 9100)',
-                                style: TextStyle(fontSize: 12, color: Color(0xFF16A34A)),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF16A34A),
+                                ),
                               ),
                             ],
                           ),
@@ -162,19 +181,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           onPressed: () async {
                             final ip = printers[index];
-                            final port = int.tryParse(_portController.text) ?? 9100;
-                            final paperSize = _paperSizeController.text.isEmpty ? '80' : _paperSizeController.text;
-                            
+                            final port =
+                                int.tryParse(_portController.text) ?? 9100;
+                            final paperSize = _paperSizeController.text.isEmpty
+                                ? '80'
+                                : _paperSizeController.text;
+
                             _showSnackBar('Đang gửi lệnh in thử tới $ip...');
                             final msg = await _printerService.printBill(
                               ip: ip,
                               port: port,
                               paperSizeStr: paperSize,
-                              content: '-------------TEST OK-------------\nNeu ban doc duoc dong nay,\nmay in dang hoat dong tot!\n---------------------------------\n\n\n',
+                              content:
+                                  '-------------TEST OK-------------\nmay in dang hoat dong tot!\n---------------------------------\n\n\n',
                             );
-                            
+
                             if (mounted) {
-                              _showSnackBar(msg, isError: msg.contains('Lỗi') || msg.contains('Không thể'));
+                              _showSnackBar(
+                                msg,
+                                isError:
+                                    msg.contains('Lỗi') ||
+                                    msg.contains('Không thể'),
+                              );
                             }
                           },
                         ),
@@ -189,7 +217,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ShadButton.outline(
               child: const Text('Hủy'),
               onPressed: () => Navigator.pop(context),
-            )
+            ),
           ],
         );
       },
@@ -210,7 +238,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cài Đặt', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
+        title: const Text(
+          'Cài Đặt',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -238,25 +269,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ShadButton.outline(
                               onPressed: _isScanning ? null : _scanNetwork,
                               child: _isScanning
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                                : const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(LucideIcons.searchCode, size: 14),
-                                      SizedBox(width: 6),
-                                      Text('Dò tìm', style: TextStyle(fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(LucideIcons.searchCode, size: 14),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Dò tìm',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ],
                         ),
-                        if (_isScanning) ...[  
+                        if (_isScanning) ...[
                           const SizedBox(height: 8),
                           Row(
                             children: [
                               Expanded(
                                 child: LinearProgressIndicator(
-                                  value: _scanTotal > 0 ? _scanProgress / _scanTotal : null,
+                                  value: _scanTotal > 0
+                                      ? _scanProgress / _scanTotal
+                                      : null,
                                   minHeight: 4,
                                   borderRadius: BorderRadius.circular(2),
                                 ),
@@ -264,13 +308,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 '$_scanProgress/$_scanTotal',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFF71717A)),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF71717A),
+                                ),
                               ),
                             ],
                           ),
                         ],
                         const SizedBox(height: 24),
-                        
+
                         _buildLabel('Cổng (Port)'),
                         ShadInput(
                           controller: _portController,
@@ -286,7 +333,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           placeholder: const Text('Ví dụ: 58 hoặc 80'),
                         ),
                         const SizedBox(height: 24),
-                        
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -303,7 +350,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const Text(
                           'Khi bật, hệ thống sẽ tự động tách phần lẻ ra thành đơn vị gốc (Ví dụ: 4P 12g).',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF71717A)),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF71717A),
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Row(
@@ -328,7 +378,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const my_prinf_app_items.ItemSettingsScreen(),
+                                builder: (_) =>
+                                    const my_prinf_app_items.ItemSettingsScreen(),
                               ),
                             );
                           },
@@ -339,13 +390,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 Icon(LucideIcons.packageCheck),
                                 SizedBox(width: 16),
                                 Expanded(
-                                  child: Text('Cài đặt món ăn & Định mức', style: TextStyle(fontWeight: FontWeight.w600)),
+                                  child: Text(
+                                    'Cài đặt món ăn & Định mức',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                                 Icon(LucideIcons.chevronRight),
                               ],
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
