@@ -4,40 +4,67 @@ import 'dart:io';
 class NetworkScannerService {
   final NetworkInfo _networkInfo = NetworkInfo();
 
-  /// Quét mạng nội bộ để tìm các địa chỉ IP đang mở port (mặc định 9100 cho máy in)
-  Future<List<String>> scanForPrinters({int port = 9100}) async {
+  /// Quét mạng nội bộ theo từng batch nhỏ để tránh nghẽn mạng.
+  /// [onProgress] callback trả về (scanned, total) để cập nhật UI tiến trình.
+  Future<List<String>> scanForPrinters({
+    int port = 9100,
+    int batchSize = 30,
+    int timeoutMs = 800,
+    void Function(int scanned, int total)? onProgress,
+  }) async {
     final List<String> activeIps = [];
     final String? wifiIP = await _networkInfo.getWifiIP();
-    
+
     if (wifiIP == null) {
-      return activeIps; // Không có kết nối wifi
+      return activeIps;
     }
 
     final String subnet = wifiIP.substring(0, wifiIP.lastIndexOf('.'));
-    final List<Future<void>> futures = [];
+    final List<int> range = List.generate(254, (i) => i + 1);
+    final int total = range.length;
+    int scanned = 0;
 
-    // Quét từ 1 đến 254
-    for (int i = 1; i < 255; i++) {
-      final String host = '$subnet.$i';
-      futures.add(_checkPort(host, port).then((isOpen) {
-        if (isOpen) {
-          activeIps.add(host);
-        }
-      }));
+    // Quét theo batch để tránh mở quá nhiều socket cùng lúc
+    for (int i = 0; i < total; i += batchSize) {
+      final int end = (i + batchSize < total) ? i + batchSize : total;
+      final batch = range.sublist(i, end);
+
+      final results = await Future.wait(
+        batch.map((n) async {
+          final host = '$subnet.$n';
+          final isOpen = await _checkPort(host, port, timeoutMs: timeoutMs);
+          return isOpen ? host : null;
+        }),
+      );
+
+      for (final ip in results) {
+        if (ip != null) activeIps.add(ip);
+      }
+
+      scanned += batch.length;
+      onProgress?.call(scanned, total);
     }
 
-    // Chờ quét xong tất cả
-    await Future.wait(futures);
+    // Sắp xếp theo thứ tự IP tăng dần
+    activeIps.sort((a, b) {
+      final aParts = a.split('.').last;
+      final bParts = b.split('.').last;
+      return int.parse(aParts).compareTo(int.parse(bParts));
+    });
+
     return activeIps;
   }
 
-  Future<bool> _checkPort(String ip, int port) async {
+  Future<bool> _checkPort(String ip, int port, {int timeoutMs = 800}) async {
     try {
-      // Đặt timeout ngắn (ví dụ 500ms) để quét nhanh
-      final socket = await Socket.connect(ip, port, timeout: const Duration(milliseconds: 500));
+      final socket = await Socket.connect(
+        ip,
+        port,
+        timeout: Duration(milliseconds: timeoutMs),
+      );
       socket.destroy();
       return true;
-    } catch (e) {
+    } catch (_) {
       return false;
     }
   }

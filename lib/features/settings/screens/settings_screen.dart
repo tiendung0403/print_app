@@ -20,6 +20,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _portController = TextEditingController();
   final _paperSizeController = TextEditingController();
   bool _isScanning = false;
+  int _scanProgress = 0;
+  int _scanTotal = 254;
 
   final NetworkScannerService _scannerService = NetworkScannerService();
 
@@ -58,14 +60,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _scanNetwork() async {
     setState(() {
       _isScanning = true;
+      _scanProgress = 0;
+      _scanTotal = 254;
     });
 
     try {
-      final activePrinters = await _scannerService.scanForPrinters();
-      
+      final activePrinters = await _scannerService.scanForPrinters(
+        onProgress: (scanned, total) {
+          if (!mounted) return;
+          setState(() {
+            _scanProgress = scanned;
+            _scanTotal = total;
+          });
+        },
+      );
+
       if (!mounted) return;
       setState(() {
         _isScanning = false;
+        _scanProgress = 0;
       });
 
       if (activePrinters.isEmpty) {
@@ -80,6 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!mounted) return;
       setState(() {
         _isScanning = false;
+        _scanProgress = 0;
       });
       _showSnackBar('Lỗi khi quét mạng: $e', isError: true);
     }
@@ -176,10 +190,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               onPressed: _isScanning ? null : _scanNetwork,
                               child: _isScanning
                                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                                : const Text('Dò tìm', style: TextStyle(fontWeight: FontWeight.w600)),
+                                : const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(LucideIcons.searchCode, size: 14),
+                                      SizedBox(width: 6),
+                                      Text('Dò tìm', style: TextStyle(fontWeight: FontWeight.w600)),
+                                    ],
+                                  ),
                             ),
                           ],
                         ),
+                        if (_isScanning) ...[  
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: LinearProgressIndicator(
+                                  value: _scanTotal > 0 ? _scanProgress / _scanTotal : null,
+                                  minHeight: 4,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '$_scanProgress/$_scanTotal',
+                                style: const TextStyle(fontSize: 11, color: Color(0xFF71717A)),
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         
                         _buildLabel('Cổng (Port)'),
