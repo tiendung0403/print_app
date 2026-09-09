@@ -48,18 +48,22 @@ class _HomeScreenState extends State<HomeScreen> {
       final pSize = parsePaperSize(paperSize);
       final double printWidth = getPrintWidth(pSize).toDouble();
       
+      final fontSize = getReceiptFontSize(pSize);
+
       Widget receiptWidget = Directionality(
         textDirection: TextDirection.ltr,
         child: Container(
           width: printWidth,
           color: Colors.white,
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
           child: Text(
             content,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.black,
-              fontSize: 24, 
+              fontSize: fontSize,
               fontFamily: 'monospace',
+              height: 1.2,
+              letterSpacing: 0,
             ),
           ),
         ),
