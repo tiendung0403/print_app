@@ -120,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shrinkWrap: true,
               itemCount: printers.length,
               itemBuilder: (context, index) {
-                return InkWell(
+                return GestureDetector(
                   onTap: () {
                     setState(() {
                       _ipController.text = printers[index];
