@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:convert';
 import '../../features/inventory/models/item.dart';
 import '../../features/inventory/models/shift_record.dart';
 import '../../features/inventory/models/entry_log.dart';
@@ -190,5 +191,60 @@ class DatabaseHelper {
   Future<int> deleteEntry(int id) async {
     final db = await instance.database;
     return await db.delete('entries', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // --- Backup & Restore Methods ---
+  
+  /// Xuất toàn bộ dữ liệu ra định dạng JSON string
+  Future<String> exportDataToJson() async {
+    final db = await instance.database;
+    final items = await db.query('items');
+    final shifts = await db.query('shifts');
+    final entries = await db.query('entries');
+
+    final data = {
+      'version': 1,
+      'export_time': DateTime.now().toIso8601String(),
+      'items': items,
+      'shifts': shifts,
+      'entries': entries,
+    };
+
+    return jsonEncode(data);
+  }
+
+  /// Khôi phục toàn bộ dữ liệu từ JSON string (ghi đè toàn bộ)
+  Future<void> importDataFromJson(String jsonString) async {
+    final data = jsonDecode(jsonString) as Map<String, dynamic>;
+    
+    if (!data.containsKey('items') || !data.containsKey('shifts') || !data.containsKey('entries')) {
+      throw FormatException('File backup không đúng định dạng hoặc bị lỗi.');
+    }
+
+    final db = await instance.database;
+    
+    // Sử dụng transaction để đảm bảo toàn vẹn dữ liệu
+    await db.transaction((txn) async {
+      // 1. Xóa sạch dữ liệu cũ
+      await txn.delete('entries');
+      await txn.delete('shifts');
+      await txn.delete('items');
+
+      // 2. Chèn dữ liệu mới
+      final items = data['items'] as List;
+      for (var item in items) {
+        await txn.insert('items', Map<String, dynamic>.from(item));
+      }
+
+      final shifts = data['shifts'] as List;
+      for (var shift in shifts) {
+        await txn.insert('shifts', Map<String, dynamic>.from(shift));
+      }
+
+      final entries = data['entries'] as List;
+      for (var entry in entries) {
+        await txn.insert('entries', Map<String, dynamic>.from(entry));
+      }
+    });
   }
 }

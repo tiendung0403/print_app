@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:toastification/toastification.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import '../../../core/database/database_helper.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/printing/network_scanner_service.dart';
 import '../../../core/printing/printer_service.dart';
@@ -402,6 +404,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Dữ liệu',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: _restoreData,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(LucideIcons.downloadCloud, color: Colors.blue),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'Khôi phục dữ liệu',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Từ file backup.json trên Telegram',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(LucideIcons.chevronRight),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -430,6 +478,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _restoreData() async {
+    try {
+      PlatformFile? result = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.path != null) {
+        File file = File(result.path!);
+        String jsonString = await file.readAsString();
+        
+        await DatabaseHelper.instance.importDataFromJson(jsonString);
+        
+        if (mounted) {
+          toastification.show(
+            context: context,
+            title: const Text('Khôi phục dữ liệu thành công!'),
+            description: const Text('Toàn bộ món ăn và tồn kho đã được khôi phục.'),
+            type: ToastificationType.success,
+            autoCloseDuration: const Duration(seconds: 4),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        toastification.show(
+          context: context,
+          title: Text('Lỗi khôi phục: $e'),
+          type: ToastificationType.error,
+          autoCloseDuration: const Duration(seconds: 4),
+        );
+      }
+    }
   }
 
   @override

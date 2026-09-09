@@ -91,7 +91,7 @@ class SyncService {
 
       sb.writeln('-------------------------------------</pre>');
 
-      // Send to Telegram
+      // Send text message to Telegram
       final url = Uri.parse('https://api.telegram.org/bot$botToken/sendMessage');
       final response = await http.post(
         url,
@@ -104,6 +104,31 @@ class SyncService {
       );
 
       if (response.statusCode == 200) {
+        // Gửi đính kèm file backup JSON
+        try {
+          final backupJson = await db.exportDataToJson();
+          final docUrl = Uri.parse('https://api.telegram.org/bot$botToken/sendDocument');
+          
+          final request = http.MultipartRequest('POST', docUrl);
+          request.fields['chat_id'] = chatId;
+          request.fields['caption'] = '📦 File sao lưu tự động cho ca:\n$printTitle\n\nĐể khôi phục, tải file này về máy, mở App -> Cài đặt -> Khôi phục dữ liệu.';
+          
+          // Tạo file từ string trong memory (không cần ghi ra đĩa)
+          final backupFileName = 'print_app_backup_${DateTime.now().millisecondsSinceEpoch}.json';
+          request.files.add(
+            http.MultipartFile.fromString(
+              'document',
+              backupJson,
+              filename: backupFileName,
+            ),
+          );
+          
+          await request.send();
+        } catch (e) {
+          print('Lỗi gửi file backup: $e');
+          // Vẫn coi là đồng bộ thành công vì text đã gửi được
+        }
+
         // Cập nhật is_synced trong database
         shift.isSynced = true;
         await db.updateShift(shift);
