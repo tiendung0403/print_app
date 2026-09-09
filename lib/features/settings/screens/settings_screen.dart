@@ -4,6 +4,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:toastification/toastification.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/printing/network_scanner_service.dart';
+import '../../../core/printing/printer_service.dart';
 import '../../inventory/screens/item_settings_screen.dart' as my_prinf_app_items;
 
 class SettingsScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _scanTotal = 254;
 
   final NetworkScannerService _scannerService = NetworkScannerService();
+  final PrinterService _printerService = PrinterService();
 
   @override
   void initState() {
@@ -147,6 +149,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ],
                           ),
+                        ),
+                        ShadButton.outline(
+                          size: ShadButtonSize.sm,
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(LucideIcons.printer, size: 14),
+                              SizedBox(width: 4),
+                              Text('In thử'),
+                            ],
+                          ),
+                          onPressed: () async {
+                            final ip = printers[index];
+                            final port = int.tryParse(_portController.text) ?? 9100;
+                            final paperSize = _paperSizeController.text.isEmpty ? '80' : _paperSizeController.text;
+                            
+                            _showSnackBar('Đang gửi lệnh in thử tới $ip...');
+                            final msg = await _printerService.printBill(
+                              ip: ip,
+                              port: port,
+                              paperSizeStr: paperSize,
+                              content: '-------------TEST OK-------------\nNeu ban doc duoc dong nay,\nmay in dang hoat dong tot!\n---------------------------------\n\n\n',
+                            );
+                            
+                            if (mounted) {
+                              _showSnackBar(msg, isError: msg.contains('Lỗi') || msg.contains('Không thể'));
+                            }
+                          },
                         ),
                       ],
                     ),
