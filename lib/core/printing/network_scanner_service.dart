@@ -11,15 +11,14 @@ class NetworkScannerService {
     return status.isGranted;
   }
 
-  /// Quét mạng nội bộ theo từng batch nhỏ để tránh nghẽn mạng.
-  /// [onProgress] callback trả về (scanned, total) để cập nhật UI tiến trình.
+  /// Quét mạng tìm thiết bị mở port 9100 (cổng in RAW/JetDirect — đặc trưng máy in).
+  /// Trả về danh sách IP sắp xếp tăng dần.
   Future<List<String>> scanForPrinters({
     int port = 9100,
     int batchSize = 30,
     int timeoutMs = 800,
     void Function(int scanned, int total)? onProgress,
   }) async {
-    // Kiểm tra & xin quyền vị trí nếu cần
     final hasPermission = await requestLocationPermission();
     if (!hasPermission) {
       throw Exception(
@@ -28,9 +27,7 @@ class NetworkScannerService {
       );
     }
 
-    final List<String> activeIps = [];
     final String? wifiIP = await _networkInfo.getWifiIP();
-
     if (wifiIP == null) {
       throw Exception(
         'Không lấy được địa chỉ IP WiFi.\n'
@@ -42,8 +39,8 @@ class NetworkScannerService {
     final List<int> range = List.generate(254, (i) => i + 1);
     final int total = range.length;
     int scanned = 0;
+    final List<String> activeIps = [];
 
-    // Quét theo batch để tránh mở quá nhiều socket cùng lúc
     for (int i = 0; i < total; i += batchSize) {
       final int end = (i + batchSize < total) ? i + batchSize : total;
       final batch = range.sublist(i, end);
@@ -64,12 +61,9 @@ class NetworkScannerService {
       onProgress?.call(scanned, total);
     }
 
-    // Sắp xếp theo thứ tự IP tăng dần
-    activeIps.sort((a, b) {
-      final aParts = a.split('.').last;
-      final bParts = b.split('.').last;
-      return int.parse(aParts).compareTo(int.parse(bParts));
-    });
+    // Sắp xếp theo số cuối IP tăng dần
+    activeIps.sort((a, b) => int.parse(a.split('.').last)
+        .compareTo(int.parse(b.split('.').last)));
 
     return activeIps;
   }

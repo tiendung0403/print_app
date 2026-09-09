@@ -67,7 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _showSnackBar('🔍 Đang quét mạng, vui lòng chờ...');
 
     try {
-      final activePrinters = await _scannerService.scanForPrinters(
+      final printers = await _scannerService.scanForPrinters(
         onProgress: (scanned, total) {
           if (!mounted) return;
           setState(() {
@@ -83,17 +83,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _scanProgress = 0;
       });
 
-      if (activePrinters.isEmpty) {
+      if (printers.isEmpty) {
         _showSnackBar(
           'Không tìm thấy máy in nào.\nKiểm tra máy in có bật và cùng mạng WiFi không.',
           isError: true,
         );
-      } else if (activePrinters.length == 1) {
-        _ipController.text = activePrinters.first;
-        _showSnackBar('✅ Đã tìm thấy máy in tại ${activePrinters.first}');
+      } else if (printers.length == 1) {
+        _ipController.text = printers.first;
+        _showSnackBar('✅ Đã tìm thấy máy in tại ${printers.first}');
       } else {
-        _showSnackBar('✅ Tìm thấy ${activePrinters.length} thiết bị, chọn máy in bên dưới.');
-        _showPrinterSelectionDialog(activePrinters);
+        _showSnackBar('✅ Tìm thấy ${printers.length} máy in, chọn bên dưới.');
+        _showPrinterSelectionDialog(printers);
       }
     } catch (e) {
       if (!mounted) return;
@@ -134,9 +134,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.printer, size: 20, color: Color(0xFF71717A)),
+                        const Icon(LucideIcons.printer, size: 20, color: Color(0xFF16A34A)),
                         const SizedBox(width: 12),
-                        Text(printers[index], style: const TextStyle(fontWeight: FontWeight.w500)),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(printers[index], style: const TextStyle(fontWeight: FontWeight.w600)),
+                              const Text(
+                                '🖨️ Máy in (Port 9100)',
+                                style: TextStyle(fontSize: 12, color: Color(0xFF16A34A)),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
