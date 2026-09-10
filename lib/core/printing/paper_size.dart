@@ -25,13 +25,13 @@ int getPaperCharactersWidth(PaperSize size) {
 /// Công thức: printWidth / maxChars ≈ pixel/ký tự (monospace)
 /// mm58: 384 / 32 = 12px/char → fontSize 12
 /// mm80: 576 / 48 = 12px/char → fontSize 12
-/// Tuy nhiên do font có padding nội tại, dùng 11.5 cho vừa vặn.
+/// Tuy nhiên do font có padding nội tại và một số máy in lề to, dùng 10.0 cho vừa vặn.
 double getReceiptFontSize(PaperSize size) {
   switch (size) {
     case PaperSize.mm58:
-      return 11.5;
+      return 10.0;
     case PaperSize.mm80:
-      return 11.5;
+      return 10.0;
   }
 }
 
