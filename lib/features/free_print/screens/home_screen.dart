@@ -72,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final screenshotController = ScreenshotController();
       final Uint8List capturedImage = await screenshotController.captureFromWidget(
         receiptWidget,
+        pixelRatio: 1.0,
         delay: const Duration(milliseconds: 100),
       );
       

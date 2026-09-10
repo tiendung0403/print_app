@@ -21,17 +21,18 @@ int getPaperCharactersWidth(PaperSize size) {
   }
 }
 
-/// Font size phù hợp để ảnh in lấp đầy chiều rộng giấy.
-/// Công thức: printWidth / maxChars ≈ pixel/ký tự (monospace)
-/// mm58: 384 / 32 = 12px/char → fontSize 12
-/// mm80: 576 / 48 = 12px/char → fontSize 12
-/// Tuy nhiên do font có padding nội tại và một số máy in lề to, dùng 10.0 cho vừa vặn.
+/// Font size phù hợp để ảnh in lấp đầy chiều rộng giấy (tỷ lệ pixel 1:1).
+/// Công thức: printWidth / maxChars = pixel/ký tự (width)
+/// mm58: 384 / 32 = 12px/char width.
+/// mm80: 576 / 48 = 12px/char width.
+/// Với font monospace, width ≈ 0.6 * height (fontSize).
+/// Do đó fontSize ≈ 12 / 0.6 = 20.0.
 double getReceiptFontSize(PaperSize size) {
   switch (size) {
     case PaperSize.mm58:
-      return 10.0;
+      return 20.0;
     case PaperSize.mm80:
-      return 10.0;
+      return 20.0;
   }
 }
 
