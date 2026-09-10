@@ -15,24 +15,24 @@ int getPrintWidth(PaperSize size) {
 int getPaperCharactersWidth(PaperSize size) {
   switch (size) {
     case PaperSize.mm58:
-      return 32;
+      return 42; // Font B on 58mm
     case PaperSize.mm80:
-      return 48;
+      return 64; // Font B on 80mm
   }
 }
 
 /// Font size phù hợp để ảnh in lấp đầy chiều rộng giấy (tỷ lệ pixel 1:1).
 /// Công thức: printWidth / maxChars = pixel/ký tự (width)
-/// mm58: 384 / 32 = 12px/char width.
-/// mm80: 576 / 48 = 12px/char width.
+/// mm58: 384 / 42 ≈ 9.14px/char width.
+/// mm80: 576 / 64 = 9px/char width.
 /// Với font monospace, width ≈ 0.6 * height (fontSize).
-/// Do đó fontSize ≈ 12 / 0.6 = 20.0.
+/// Do đó fontSize ≈ 9 / 0.6 = 15.0.
 double getReceiptFontSize(PaperSize size) {
   switch (size) {
     case PaperSize.mm58:
-      return 20.0;
+      return 15.0;
     case PaperSize.mm80:
-      return 20.0;
+      return 15.0;
   }
 }
 

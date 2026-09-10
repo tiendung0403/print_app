@@ -43,12 +43,12 @@ class _ShiftSummaryScreenState extends State<ShiftSummaryScreen> {
     final enableRounding = widget.storageService.enableRounding;
     
     final is80mm = widget.storageService.paperSize == '80';
-    final lineWidth = is80mm ? 48 : 32;
+    final lineWidth = is80mm ? 64 : 42; // Font B size
     final separator = '-' * lineWidth;
     
-    final col1Len = is80mm ? 20 : 12;
-    final col2Len = is80mm ? 13 : 9;
-    final col3Len = is80mm ? 15 : 11;
+    final col1Len = is80mm ? 30 : 16;
+    final col2Len = is80mm ? 16 : 12;
+    final col3Len = is80mm ? 18 : 14;
 
     StringBuffer sb = StringBuffer();
     sb.writeln(separator);
