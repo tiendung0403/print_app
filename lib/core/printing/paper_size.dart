@@ -3,6 +3,41 @@ enum PaperSize {
   mm80,
 }
 
+class PaperConfig {
+  final PaperSize size;
+  final String name; // "80" hoặc "58"
+  final int printWidth; // 576 hoặc 384
+  final int defaultColumns; // 44 hoặc 32
+  final double defaultFontSize; // 22.0 hoặc 19.0
+
+  const PaperConfig({
+    required this.size,
+    required this.name,
+    required this.printWidth,
+    required this.defaultColumns,
+    required this.defaultFontSize,
+  });
+
+  static PaperConfig fromString(String sizeStr) {
+    if (sizeStr == '58') {
+      return const PaperConfig(
+        size: PaperSize.mm58,
+        name: '58',
+        printWidth: 384,
+        defaultColumns: 32,
+        defaultFontSize: 19.0,
+      );
+    }
+    return const PaperConfig(
+      size: PaperSize.mm80,
+      name: '80',
+      printWidth: 576,
+      defaultColumns: 44,
+      defaultFontSize: 22.0,
+    );
+  }
+}
+
 int getPrintWidth(PaperSize size) {
   switch (size) {
     case PaperSize.mm58:
@@ -15,24 +50,18 @@ int getPrintWidth(PaperSize size) {
 int getPaperCharactersWidth(PaperSize size) {
   switch (size) {
     case PaperSize.mm58:
-      return 42; // Font B on 58mm
+      return 32; // Font A chuẩn 58mm (chữ to rõ)
     case PaperSize.mm80:
-      return 64; // Font B on 80mm
+      return 44; // Font A chuẩn 80mm (chữ to rõ)
   }
 }
 
-/// Font size phù hợp để ảnh in lấp đầy chiều rộng giấy (tỷ lệ pixel 1:1).
-/// Công thức: printWidth / maxChars = pixel/ký tự (width)
-/// mm58: 384 / 42 ≈ 9.14px/char width.
-/// mm80: 576 / 64 = 9px/char width.
-/// Với font monospace, width ≈ 0.6 * height (fontSize).
-/// Do đó fontSize ≈ 9 / 0.6 = 15.0.
 double getReceiptFontSize(PaperSize size) {
   switch (size) {
     case PaperSize.mm58:
-      return 15.0;
+      return 19.0;
     case PaperSize.mm80:
-      return 15.0;
+      return 22.0;
   }
 }
 

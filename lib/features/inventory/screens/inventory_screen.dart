@@ -228,7 +228,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
-  @override
   void _showSnackBar(String message, {bool isError = false}) {
     toastification.show(
       context: context,

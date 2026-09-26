@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:screenshot/screenshot.dart';
-import 'package:image/image.dart' as img;
 import '../models/shift_record.dart';
 import '../../../core/database/database_helper.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/printing/printer_service.dart';
-import '../../../core/printing/paper_size.dart';
-import '../../../core/utils/vn_utils.dart';
 import 'package:toastification/toastification.dart';
 
 class ShiftSummaryScreen extends StatefulWidget {
@@ -43,12 +38,12 @@ class _ShiftSummaryScreenState extends State<ShiftSummaryScreen> {
     final enableRounding = widget.storageService.enableRounding;
     
     final is80mm = widget.storageService.paperSize == '80';
-    final lineWidth = is80mm ? 64 : 42; // Font B size
+    final lineWidth = is80mm ? 44 : 32; // Font A to rõ, vừa khít khổ 80mm / 58mm
     final separator = '-' * lineWidth;
     
-    final col1Len = is80mm ? 30 : 16;
-    final col2Len = is80mm ? 16 : 12;
-    final col3Len = is80mm ? 18 : 14;
+    final col1Len = is80mm ? 22 : 16;
+    final col2Len = is80mm ? 11 : 8;
+    final col3Len = is80mm ? 11 : 8;
 
     StringBuffer sb = StringBuffer();
     sb.writeln(separator);
@@ -179,73 +174,21 @@ class _ShiftSummaryScreenState extends State<ShiftSummaryScreen> {
   }
 
   Future<void> _executePrint(String content) async {
-    final ip = widget.storageService.ipAddress;
-    final port = widget.storageService.port;
-    final paperSize = widget.storageService.paperSize;
-
-    if (ip.isEmpty) {
-      _showToast('Vui lòng cài đặt địa chỉ IP máy in trước!', isError: true);
-      return;
-    }
-
     setState(() => _isPrinting = true);
-    
-    try {
-      final pSize = parsePaperSize(paperSize);
-      final double printWidth = getPrintWidth(pSize).toDouble();
-      
-      final fontSize = getReceiptFontSize(pSize);
 
-      Widget receiptWidget = Directionality(
-        textDirection: TextDirection.ltr,
-        child: Container(
-          width: printWidth,
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-          child: Text(
-            content,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: fontSize,
-              fontFamily: 'monospace',
-              height: 1.2,
-              letterSpacing: 0,
-            ),
-          ),
-        ),
-      );
+    final resultMsg = await _printerService.printReceipt(
+      storage: widget.storageService,
+      content: content,
+      autoFit: true,
+    );
 
-      final screenshotController = ScreenshotController();
-      final Uint8List capturedImage = await screenshotController.captureFromWidget(
-        receiptWidget,
-        pixelRatio: 1.0,
-        delay: const Duration(milliseconds: 100),
-      );
-      
-      final decodedImage = img.decodeImage(capturedImage);
-      if (decodedImage == null) {
-        throw Exception('Không thể giải mã hình ảnh');
-      }
+    if (!mounted) return;
+    setState(() => _isPrinting = false);
 
-      final resultMsg = await _printerService.printImageBill(
-        ip: ip,
-        port: port,
-        paperSizeStr: paperSize,
-        image: decodedImage,
-      );
-
-      if (!mounted) return;
-      setState(() => _isPrinting = false);
-
-      _showToast(
-        resultMsg,
-        isError: resultMsg.contains('Lỗi') || resultMsg.contains('Không thể'),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isPrinting = false);
-      _showToast('Lỗi xử lý hình ảnh: $e', isError: true);
-    }
+    _showToast(
+      resultMsg,
+      isError: resultMsg.contains('Lỗi') || resultMsg.contains('Không thể') || resultMsg.contains('Vui lòng'),
+    );
   }
 
   void _showToast(String message, {bool isError = false}) {

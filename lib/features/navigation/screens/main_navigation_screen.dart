@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../free_print/screens/home_screen.dart';
 import '../../inventory/screens/shift_list_screen.dart';
 import '../../settings/screens/settings_screen.dart';
@@ -40,7 +40,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           });
         },
         elevation: 8,
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: Icon(LucideIcons.package),
             selectedIcon: Icon(LucideIcons.packageCheck),

@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'dart:typed_data';
-import 'package:screenshot/screenshot.dart';
-import 'package:image/image.dart' as img;
 import 'package:toastification/toastification.dart';
 import '../../../core/storage/storage_service.dart';
 import '../../../core/printing/printer_service.dart';
 import '../../../core/printing/paper_size.dart';
-import '../../../core/utils/vn_utils.dart';
 import '../../settings/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final StorageService storageService;
 
-  const HomeScreen({Key? key, required this.storageService}) : super(key: key);
+  const HomeScreen({super.key, required this.storageService});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -25,16 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isPrinting = false;
 
   void _printBill() async {
-    final ip = widget.storageService.ipAddress;
-    final port = widget.storageService.port;
-    final paperSize = widget.storageService.paperSize;
-    final content = _contentController.text;
-
-    if (ip.isEmpty) {
-      _showSnackBar('Vui lòng cài đặt địa chỉ IP máy in trước!', isError: true);
-      return;
-    }
-
+    final content = _contentController.text.trim();
     if (content.isEmpty) {
       _showSnackBar('Vui lòng nhập nội dung hóa đơn!', isError: true);
       return;
@@ -44,66 +31,26 @@ class _HomeScreenState extends State<HomeScreen> {
       _isPrinting = true;
     });
 
-    try {
-      final pSize = parsePaperSize(paperSize);
-      final double printWidth = getPrintWidth(pSize).toDouble();
-      
-      final fontSize = getReceiptFontSize(pSize);
+    final paperConfig = PaperConfig.fromString(widget.storageService.paperSize);
+    // Cỡ chữ Lớn: 80mm là 26.0px, 58mm là 22.0px (to rõ, sắc nét)
+    final double largeFontSize = paperConfig.size == PaperSize.mm80 ? 26.0 : 22.0;
 
-      Widget receiptWidget = Directionality(
-        textDirection: TextDirection.ltr,
-        child: Container(
-          width: printWidth,
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-          child: Text(
-            content,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: fontSize,
-              fontFamily: 'monospace',
-              height: 1.2,
-              letterSpacing: 0,
-            ),
-          ),
-        ),
-      );
+    final resultMsg = await _printerService.printReceipt(
+      storage: widget.storageService,
+      content: content,
+      fontSize: largeFontSize,
+      autoFit: false,
+    );
 
-      final screenshotController = ScreenshotController();
-      final Uint8List capturedImage = await screenshotController.captureFromWidget(
-        receiptWidget,
-        pixelRatio: 1.0,
-        delay: const Duration(milliseconds: 100),
-      );
-      
-      final decodedImage = img.decodeImage(capturedImage);
-      if (decodedImage == null) {
-        throw Exception('Không thể giải mã hình ảnh');
-      }
+    if (!mounted) return;
+    setState(() {
+      _isPrinting = false;
+    });
 
-      final resultMsg = await _printerService.printImageBill(
-        ip: ip,
-        port: port,
-        paperSizeStr: paperSize,
-        image: decodedImage,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _isPrinting = false;
-      });
-
-      _showSnackBar(
-        resultMsg,
-        isError: resultMsg.contains('Lỗi') || resultMsg.contains('Không thể'),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isPrinting = false;
-      });
-      _showSnackBar('Lỗi xử lý hình ảnh: $e', isError: true);
-    }
+    _showSnackBar(
+      resultMsg,
+      isError: resultMsg.contains('Lỗi') || resultMsg.contains('Không thể') || resultMsg.contains('Vui lòng'),
+    );
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
@@ -152,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
               placeholder: const Text('Nhập nội dung hóa đơn vào đây...'),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           _buildPrintButton(),
           const SizedBox(height: 10),
         ],
@@ -161,10 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPreviewTab() {
-    final paperSizeStr = widget.storageService.paperSize;
-    final pSize = parsePaperSize(paperSizeStr);
-    final maxWidth = getPaperCharactersWidth(pSize);
-    final is80mm = pSize == PaperSize.mm80;
+    final paperConfig = PaperConfig.fromString(widget.storageService.paperSize);
+    final is80mm = paperConfig.size == PaperSize.mm80;
+    // Cỡ chữ Lớn: 80mm hiển thị ~35 ký tự/dòng, 58mm hiển thị ~27 ký tự/dòng
+    final maxWidth = is80mm ? 35 : 27;
     
     // Format text
     final previewText = _formatPreviewText(_contentController.text, maxWidth);

@@ -1,14 +1,28 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/shift_record.dart';
-import '../models/item.dart';
-import '../models/entry_log.dart';
 import '../../../core/database/database_helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SyncService {
-  static String get botToken => dotenv.env['TELEGRAM_BOT_TOKEN'] ?? '';
-  static String chatId = dotenv.env['TELEGRAM_CHAT_ID'] ?? ''; 
+  static String get botToken {
+    final envToken = dotenv.env['TELEGRAM_BOT_TOKEN'] ?? '';
+    if (envToken.trim().isNotEmpty) return envToken.trim();
+    return '8959150505:AAHARrbpE86c9m4-Wc5f9IceloQ7A6mGyE8';
+  }
+
+  static String _customChatId = '';
+
+  static String get chatId {
+    if (_customChatId.isNotEmpty) return _customChatId;
+    final envId = dotenv.env['TELEGRAM_CHAT_ID'] ?? '';
+    if (envId.trim().isNotEmpty) return envId.trim();
+    return '7619074675';
+  }
+
+  static set chatId(String value) {
+    _customChatId = value;
+  }
 
   static Future<bool> syncShiftToTelegram(ShiftRecord shift) async {
     if (chatId.isEmpty) {
@@ -27,9 +41,10 @@ class SyncService {
       // Xây dựng chuỗi văn bản báo cáo giống với bill in
       StringBuffer sb = StringBuffer();
       final printTitle = shift.printTitle.trim().isNotEmpty ? shift.printTitle : shift.name;
+      final escapedTitle = const HtmlEscape().convert(printTitle);
       final timeStr = DateTime.fromMillisecondsSinceEpoch(shift.timestamp).toString().split('.')[0];
       
-      sb.writeln('<b>Tên ca   :</b> $printTitle');
+      sb.writeln('<b>Tên ca   :</b> $escapedTitle');
       sb.writeln('<b>Thời gian:</b> $timeStr');
       sb.writeln('<pre>');
       sb.writeln('-------------------------------------');
