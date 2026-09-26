@@ -11,6 +11,9 @@
     <!-- Android 13+ cần quyền này để đọc thông tin WiFi -->
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
         android:usesPermissionFlags="neverForLocation" />
+    <!-- Quyền chọn ảnh từ bộ nhớ thiết bị -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
         android:label="print app"

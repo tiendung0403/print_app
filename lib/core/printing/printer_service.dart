@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:image/image.dart' as img;
 import '../storage/storage_service.dart';
 import 'paper_size.dart';
@@ -105,9 +106,10 @@ class PrinterService {
   }
 
   /// Chuyển đổi img.Image thành mã lệnh ESC/POS GS v 0
-  static List<int> imageToEscPosRaster(img.Image image) {
+  /// Chia nhỏ thành các dải (chunks) 256 dòng để bảo vệ bộ đệm máy in (tránh tràn RAM máy in khi in ảnh dài)
+  static List<int> imageToEscPosRaster(img.Image image, {int maxChunkHeight = 256}) {
     final width = image.width;
-    final height = image.height;
+    final totalHeight = image.height;
     final widthBytes = (width + 7) ~/ 8;
 
     List<int> bytes = [];
@@ -119,28 +121,32 @@ class PrinterService {
     // FS .: Hủy chế độ chữ tiếng Trung (tránh xung đột ESC/POS trên máy in nhiệt)
     bytes.addAll([0x1C, 0x2E]);
 
-    // GS v 0 m xL xH yL yH
     final xL = widthBytes & 0xFF;
     final xH = (widthBytes >> 8) & 0xFF;
-    final yL = height & 0xFF;
-    final yH = (height >> 8) & 0xFF;
 
-    bytes.addAll([0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]);
+    for (int startY = 0; startY < totalHeight; startY += maxChunkHeight) {
+      final chunkHeight = math.min(maxChunkHeight, totalHeight - startY);
+      final yL = chunkHeight & 0xFF;
+      final yH = (chunkHeight >> 8) & 0xFF;
 
-    for (int y = 0; y < height; y++) {
-      for (int byteIdx = 0; byteIdx < widthBytes; byteIdx++) {
-        int byteVal = 0;
-        for (int bit = 0; bit < 8; bit++) {
-          final x = byteIdx * 8 + bit;
-          if (x < width) {
-            final pixel = image.getPixel(x, y);
-            // Luminance: < 0.6 là màu tối (in nhiệt), >= 0.6 là màu trắng
-            if (pixel.luminanceNormalized < 0.6) {
-              byteVal |= (1 << (7 - bit));
+      // GS v 0 m xL xH yL yH
+      bytes.addAll([0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]);
+
+      for (int y = startY; y < startY + chunkHeight; y++) {
+        for (int byteIdx = 0; byteIdx < widthBytes; byteIdx++) {
+          int byteVal = 0;
+          for (int bit = 0; bit < 8; bit++) {
+            final x = byteIdx * 8 + bit;
+            if (x < width) {
+              final pixel = image.getPixel(x, y);
+              // Luminance: < 0.6 là màu tối (in nhiệt), >= 0.6 là màu trắng
+              if (pixel.luminanceNormalized < 0.6) {
+                byteVal |= (1 << (7 - bit));
+              }
             }
           }
+          bytes.add(byteVal);
         }
-        bytes.add(byteVal);
       }
     }
 

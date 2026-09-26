@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../free_print/screens/home_screen.dart';
+import '../../image_print/screens/image_print_screen.dart';
 import '../../inventory/screens/shift_list_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../../core/storage/storage_service.dart';
@@ -8,10 +9,10 @@ import '../../../core/storage/storage_service.dart';
 class MainNavigationScreen extends StatefulWidget {
   final StorageService storageService;
 
-  const MainNavigationScreen({Key? key, required this.storageService}) : super(key: key);
+  const MainNavigationScreen({super.key, required this.storageService});
 
   @override
-  _MainNavigationScreenState createState() => _MainNavigationScreenState();
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
@@ -24,6 +25,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _screens = [
       ShiftListScreen(storageService: widget.storageService),
       HomeScreen(storageService: widget.storageService),
+      ImagePrintScreen(storageService: widget.storageService),
       SettingsScreen(storageService: widget.storageService),
     ];
   }
@@ -40,7 +42,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           });
         },
         elevation: 8,
-        destinations: [
+        destinations: const [
           NavigationDestination(
             icon: Icon(LucideIcons.package),
             selectedIcon: Icon(LucideIcons.packageCheck),
@@ -52,6 +54,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             label: 'In Tự Do',
           ),
           NavigationDestination(
+            icon: Icon(LucideIcons.image),
+            selectedIcon: Icon(LucideIcons.image),
+            label: 'In Ảnh',
+          ),
+          NavigationDestination(
             icon: Icon(LucideIcons.settings),
             selectedIcon: Icon(LucideIcons.settings),
             label: 'Cài Đặt',
@@ -61,3 +68,4 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 }
+
